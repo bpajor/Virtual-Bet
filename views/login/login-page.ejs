@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/login-page.css" />
+    <title><%= pageTitle %></title>
+  </head>
+  <body>
+    <div id="container">
+      <h2>Logowanie - Piłka nożna</h2>
+      <form method="post" action="/login">
+        <label for="username">Nazwa użytkownika:</label>
+        <input type="text" id="username" name="username" required />
+
+        <label for="password">Hasło:</label>
+        <input type="password" id="password" name="password" required />
+
+        <input type="submit" value="Zaloguj" />
+        <% if (badLogin) { %>
+            <div class="invalid-user">Niepoprawne logowanie</div>
+        <%} else if (incorrectUID) {%>
+          <div class="invalid-user">Nie zostałeś poprawnie uwierzytelniony.</div>
+          <% }%>
+         
+      </form>
+    </div>
+  </body>
+</html>

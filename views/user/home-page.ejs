@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/home-page.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="container">
+      <h2>Witaj <%= username %></h2>
+      <div id="wallet">
+        <div>Portfel: <%=walletAmount%>$</div>
+        <div class="buttons">
+          <button class="btn" id="showPaymentForm">Doładuj portfel</button>
+          <form action="/user/logout" method="POST">
+            <button type="submit" class="btn">Wyloguj się</button>
+          </form>
+          <a class="button" href="twoje_zaklady.php">Twoje zakłady</a>
+        </div>
+      </div>
+      <form
+        id="paymentForm"
+        onsubmit="onFormSubmit(event)"
+      >
+        <label for="amount" class="pay-label">Podaj ilość depozytu:</label>
+        <input
+          type="number"
+          name="amount"
+          id="amount"
+          class="pay-input"
+          min="1"
+          required
+        />
+        <button type="submit" class="pay-btn">Wpłać</button>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>Mecz</th>
+            <th>Obstaw</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Mecz 1</td>
+            <td><a href="#">Obstaw</a></td>
+          </tr>
+          <tr>
+            <td>Mecz 2</td>
+            <td><a href="#">Obstaw</a></td>
+          </tr>
+          <tr>
+            <td>Mecz 3</td>
+            <td><a href="#">Obstaw</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      document
+        .getElementById("showPaymentForm")
+        .addEventListener("click", (event) => {
+          document.getElementById("paymentForm").style.display = "block";
+        });
+
+      const onFormSubmit = (event) => {
+        console.log('test');
+        const amount = document.getElementById('amount').value;
+        document.getElementById("paymentForm").style.display = "none";
+        console.log(amount);
+
+        fetch("/user/payment", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amount: amount }),
+        }).catch(error);
+      };
+    </script>
+  </body>
+</html>

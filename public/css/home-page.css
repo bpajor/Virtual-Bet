@@ -93,3 +93,19 @@ th {
 .pay-btn:hover {
   background-color: #555;
 }
+
+span {
+  font-weight: bold;
+}
+
+#oddForm {
+  display: none;
+}
+
+.show-odd-form {
+  display: none;
+}
+
+.form-th {
+  font-size: 0.8rem;
+}

@@ -9,15 +9,29 @@ export class User {
         activeUser = user;
     }
 
-    setName(name) {
-        this.name = name;
+    authorizeUser(uid, data, isUserLoggedIn, cb) {
+        if (isUserLoggedIn) {
+            for (let user in data) {
+              if (data[user].uid === uid) {
+                this.key = user;
+                this.name = data[user].Name;
+                this.walletAmount = data[user].walletAmount;
+                break;
+              }
+            }
+        }
+        cb();
     }
 
-    setWalletAmount(amount) {
-        this.walletAmount = amount;
-    }
+    // setName(name) {
+    //     this.name = name;
+    // }
 
-    setKey(key) {
-        this.key = key;
-    }
+    // setWalletAmount(amount) {
+    //     this.walletAmount = amount;
+    // }
+
+    // setKey(key) {
+    //     this.key = key;
+    // }
 }

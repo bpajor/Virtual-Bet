@@ -1,45 +1,63 @@
 import axios from "axios";
 import { User, activeUser } from "../models/user.js";
+import { API_KEY } from "../helpers/api-key.js";
 
 export const getHomePage = (req, res, next) => {
   const uid = req.params.userId;
   axios
-    .get("https://react-http-662b7-default-rtdb.firebaseio.com/Users.json")
+    .get("https://react-http-662b7-default-rtdb.firebaseio.com/.json")
     .then((response) => {
-      const data = response.data;
+      const { Users, MatchesAvailable } = response.data;
       const isUserLoggedIn = activeUser.uid === uid;
-      if (isUserLoggedIn) {
-        // let loggedUser = null;
-        for (let user in data) {
-          if (data[user].uid === uid) {
-            // loggedUser = data[user];
-            activeUser.setKey(user);
-            activeUser.setName(data[user].Name);
-            activeUser.setWalletAmount(data[user].walletAmount);
-            break;
+      activeUser.authorizeUser(uid, Users, isUserLoggedIn, async () => {
+        if (isUserLoggedIn) {
+          try {
+            const res = await axios.get(
+              `https://api.the-odds-api.com/v4/sports/soccer/odds?apiKey=${API_KEY}&regions=us&markets=h2h&dateFormat=iso&oddsFormat=decimal`
+            );
+            try {
+              const response = await axios.patch(
+                "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable.json",
+                { offers: res.data }
+              );
+            } catch (error) {
+              console.log(error);
+            }
+          } catch (error) {
+            console.log(error);
           }
+
+          let offers = null;
+          try {
+            const res = await axios.get(
+              "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable/offers.json"
+            );
+            offers = [...res.data];
+          } catch (error) {
+            console.log(error);
+            offers = null;
+          }
+          console.log(offers);
+          res.render("user/home-page", {
+            username: activeUser.name,
+            walletAmount: activeUser.walletAmount,
+            offers: offers,
+          });
+        } else {
+          res.render("login/login-page", {
+            pageTitle: "login",
+            incorrectUID: true,
+            badLogin: false,
+          });
         }
-        res.render("user/home-page", {
-          username: activeUser.name,
-          walletAmount: activeUser.walletAmount,
-        });
-      } else {
-        res.render("login/login-page", {
-          pageTitle: "login",
-          incorrectUID: true,
-          badLogin: false,
-        });
-      }
+      });
     })
     .catch((error) => {
-      console.log('active user: ', activeUser);
       res.render("login/login-page", {
         pageTitle: "login",
         incorrectUID: true,
         badLogin: false,
       });
-      // console.log(error);
-      // res.redirect(`/user/${uid}`);
     });
 };
 
@@ -48,19 +66,15 @@ export const postLogout = (req, res, next) => {
   res.redirect("/login");
 };
 
-// export const postPayment = (req, res, next) => {
-//   console.log(req.body.amount);
-  
-// }
-
 export const patchPayment = (req, res, next) => {
-  const inputWalletAmount = req.body.amount;
-  const prevWalletAmount = activeUser.walletAmount;
-  const walletAmountToPatch = +inputWalletAmount + +prevWalletAmount;
+  const inputWalletAmount = +req.body.amount;
+  const prevWalletAmount = +activeUser.walletAmount;
+  const walletAmountToPatch = inputWalletAmount + prevWalletAmount;
 
   axios
     .patch(
-      `https://react-http-662b7-default-rtdb.firebaseio.com/Users/${activeUser.key}.json`, {walletAmount: walletAmountToPatch}
+      `https://react-http-662b7-default-rtdb.firebaseio.com/Users/${activeUser.key}.json`,
+      { walletAmount: walletAmountToPatch }
     )
     .then(() => {
       res.redirect(`${activeUser.uid}`);

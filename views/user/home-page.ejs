@@ -16,7 +16,7 @@
           <form action="/user/logout" method="POST">
             <button type="submit" class="btn">Wyloguj się</button>
           </form>
-          <a class="button" href="twoje_zaklady.php">Twoje zakłady</a>
+            <a class="button" href="/user/<%=uid%>/odds">Twoje zakłady</a>
         </div>
       </div>
       <form id="paymentForm" onsubmit="onFormSubmit(event)">
@@ -43,23 +43,31 @@
           <tr>
             <td><%=offer.home_team%> <span>vs</span> <%= offer.away_team %></td>
             <td>
-              <button type="button" class="btn showAddForm" id=<%= offer.id%>>Obstaw</button>
+              <button
+                type="button"
+                class="btn showAddForm"
+                id=<%=offer.id%>>
+                Obstaw
+              </button>
             </td>
           </tr>
           <tr class="show-odd-form" id="<%= offer.id%>_tr">
             <td>
-              <form>
                 <table>
                   <thead>
                     <th class="form-th">Bukmacher</th>
-                    <th class="form-th">Kurs (<%=offer.home_team%>)</th>
+                    <th class="form-th">Kurs (<%=offer.home_team%>) - 1</th>
                     <th class="form-th">Kurs (remis)</th>
-                    <th class="form-th">Kurs (<%= offer.away_team %>)</th>
+                    <th class="form-th">Kurs (<%= offer.away_team %>) - 2</th>
                     <th class="form-th">Data rozpoczęcia</th>
+                    <th class="form-th">Wybór</th>
+                    <th class="form-th">Stawka [$] (min 1$)</th>
+                    <th class="form-th">Obstaw</th>
                   </thead>
                   <tbody>
                     <% for (let bookmaker of offer.bookmakers) {%>
-                    <tr>
+                    <form method="POST" action="/user/<%=uid%>/odd?offerId=<%=offer.id%>&bookmacherId=<%=bookmaker.key%>">
+                      <tr>
                       <td><%=bookmaker.title%></td>
                       <td><%=bookmaker.markets[0].outcomes[0].price %></td>
                       <td><%=bookmaker.markets[0].outcomes[1].price %></td>
@@ -70,12 +78,24 @@
                         hour: '2-digit', minute: '2-digit', second: '2-digit',
                         timeZone: 'Europe/Warsaw' } %>
                       </td>
-                      <td></td>
+                      <td>
+                        <select name="select">
+                          <option value="1">1</option>
+                          <option value="draw">remis</option>
+                          <option value="2">2</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input class="amount-input" type="number" min="1" name="amount" required>
+                      </td>
+                      <td>
+                        <button type="submit" class="btn">Obstaw</button>
+                      </td>
                     </tr>
+                  </form>
                     <% } %>
                   </tbody>
                 </table>
-              </form>
             </td>
           </tr>
           <% } %>
@@ -86,12 +106,16 @@
     <script>
       document.querySelectorAll(".showAddForm").forEach((button) => {
         button.addEventListener("click", (event) => {
-          
-          if (document.getElementById(`${button.id}_tr`).style.display === "none" || window.getComputedStyle(document.getElementById(`${button.id}_tr`)).display === 'none') {
+          if (
+            document.getElementById(`${button.id}_tr`).style.display ===
+              "none" ||
+            window.getComputedStyle(document.getElementById(`${button.id}_tr`))
+              .display === "none"
+          ) {
             document.getElementById(`${button.id}_tr`).style.display = "block";
             return;
           }
-          
+
           document.getElementById(`${button.id}_tr`).style.display = "none";
         });
       });
@@ -103,10 +127,8 @@
         });
 
       const onFormSubmit = (event) => {
-        console.log("test");
         const amount = document.getElementById("amount").value;
         document.getElementById("paymentForm").style.display = "none";
-        console.log(amount);
 
         fetch("/user/payment", {
           method: "PATCH",

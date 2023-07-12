@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/odds-page.css" />
+    <script
+      src="https://kit.fontawesome.com/5410e8ffe4.js"
+      crossorigin="anonymous"
+    ></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <section class="btn-section">
+      <a class="return-btn" href="/user/<%=uid%>">Wróć</a>
+    </section>
+    <section class="odds-section">
+      <table>
+        <thead>
+          <tr>
+            <th>1</th>
+            <th>2</th>
+            <th>Data rozpoczęcia</th>
+            <th>Wybór</th>
+            <th>Stawka</th>
+            <th>Mnożnik</th>
+            <th>Możliwa wygrana</th>
+            <th>Status</th>
+            <th>Wynik</th>
+            <th>Wycofaj zakład</th>
+            <th>Usuń zakład</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (let odd in odds) {%>
+          <tr>
+            <td><%=odds[odd].home_team%></td>
+            <td><%=odds[odd].away_team%></td>
+            <td>
+              <%= new Date(odds[odd].commence_time).toLocaleString('pl-PL'), {
+              hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone:
+              'Europe/Warsaw' } %>
+            </td>
+            <% if (odds[odd].userChoice === 'draw') {%>
+            <td>remis</td>
+            <% } else {%>
+            <td><%=odds[odd].userChoice%></td>
+            <% }%>
+            <td><%=odds[odd].oddAmount%> $</td>
+            <td>x<%=odds[odd].factor%></td>
+            <td><%=(odds[odd].oddAmount * odds[odd].factor).toFixed(2)%> $</td>
+            <% if (odds[odd].completed) {%> <% if ((odds[odd].userChoice === '1'
+            && odds[odd].scores[0] > odds[odd].scores[1]) ||
+            (odds[odd].userChoice === '2' && odds[odd].scores[0] <
+            odds[odd].scores[1]) || (odds[odd].userChoice === 'draw' &&
+            odds[odd].scores[0] === odds[odd].scores[1])) { %>
+            <td>
+              <i
+                class="fa-solid fa-circle-check fa-2xl"
+                style="color: #2bd61f"
+              ></i>
+            </td>
+            <%} else {%>
+            <td>
+              <i
+                class="fa-sharp fa-solid fa-circle-xmark fa-2xl"
+                style="color: #e01f28"
+              ></i>
+            </td>
+            <%}%> <% } else if (odds[odd].commence_time - new Date() < 0 ) {%>
+            <td><i class="fa-solid fa-tv fa-2xl"></i></td>
+            <% } else {%>
+            <td>
+              <i class="fa-solid fa-spinner fa-spin fa-2xl" style="color: #121212"></i>
+            </td>
+            <%}%> <% if (!odds[odd].scores) {%>
+            <td>
+              <i class="fa-solid fa-spinner fa-spin fa-2xl" style="color: #121212"></i>
+            </td>
+            <% } else {%>
+            <td>
+              <%=odds[odd].scores[0].score%> - <%=odds[odd].scores[1].score%>
+            </td>
+            <% } %>
+            <td>
+              <% if (!odds[odd].scores) {%>
+              <button>Wycofaj</button>
+              <% } else {%>
+              <button disabled>Wycofaj</button>
+              <% } %>
+            </td>
+            <td>
+              <% if ( (odds[odd].commence_time - new Date() < 0) &&
+              !odds[odd].completed ) {%>
+              <button disabled>Usuń</button>
+              <% } else {%>
+              <button>Usuń</button>
+              <% } %>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </section>
+
+    <script></script>
+  </body>
+</html>

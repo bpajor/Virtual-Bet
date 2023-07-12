@@ -1,16 +1,14 @@
 import express from 'express';
-import { getHomePage, postLogout, patchPayment } from '../controllers/user.js';
+import { getHomePage, postLogout, patchPayment, getOdds, postOdd } from '../controllers/user.js';
 
 export const router = express.Router();
 
-// const userController = require('../controllers/user');
-
 router.post('/user/logout', postLogout);
-
-// router.post('/user/payment', postPayment);
 
 router.patch('/user/payment/', patchPayment);
 
-router.get('/user/:userId', getHomePage);
+router.get('/user/:userId/odds', getOdds);
 
-// module.exports = router;
+router.post('/user/:userId/odd', postOdd);
+
+router.get('/user/:userId', getHomePage);

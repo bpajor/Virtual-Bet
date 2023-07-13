@@ -1,7 +1,9 @@
 import express from 'express';
-import { getHomePage, postLogout, patchPayment, getOdds, postOdd } from '../controllers/user.js';
+import { getHomePage, postLogout, patchPayment, getOdds, postOdd, deleteOdd } from '../controllers/user.js';
 
 export const router = express.Router();
+
+router.delete('/user/:userId/odds/delete', deleteOdd)
 
 router.post('/user/logout', postLogout);
 

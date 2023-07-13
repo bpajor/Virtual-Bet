@@ -33,7 +33,7 @@
         </thead>
         <tbody>
           <% for (let odd in odds) {%>
-          <tr>
+          <tr id=<%=odds[odd].oddId%>>
             <td><%=odds[odd].home_team%></td>
             <td><%=odds[odd].away_team%></td>
             <td>
@@ -84,7 +84,7 @@
             <% } %>
             <td>
               <% if (!odds[odd].scores) {%>
-              <button>Wycofaj</button>
+              <button onclick='onDropOddButtonClicked("<%=odds[odd].oddAmount%>", "<%=odds[odd].oddId%>")'>Wycofaj</button>
               <% } else {%>
               <button disabled>Wycofaj</button>
               <% } %>
@@ -103,6 +103,20 @@
       </table>
     </section>
 
-    <script></script>
+    <script>
+      const onDropOddButtonClicked = (oddAmount, oddId) => {
+        const row = document.getElementById(oddId);
+        row.remove();
+        
+        fetch(`/user/<%=uid%>/odds/delete?oddAmount=${oddAmount}&oddId=${oddId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).catch((error) => {
+          console.log(error);
+        });
+      }
+    </script>
   </body>
 </html>

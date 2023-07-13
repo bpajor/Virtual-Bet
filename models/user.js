@@ -9,6 +9,13 @@ export class User {
     activeUser = user;
   }
 
+  static async upgradeUserWallet(amount, sendReq) {
+    const newAmount = +activeUser.walletAmount + +amount;
+    activeUser.walletAmount = newAmount;
+
+    await sendReq(newAmount);
+  }
+
   authorizeUser(uid, data, isUserLoggedIn, cb) {
     if (isUserLoggedIn) {
       for (let user in data) {

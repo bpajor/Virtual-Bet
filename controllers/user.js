@@ -81,7 +81,9 @@ export const getHomePage = async (req, res, next) => {
         offers,
       });
     } else {
-      res.status(401).render("user/not-authorised", {uid: activeUser.uid})
+      res
+        .status(401)
+        .render("user/not-authorised-page", { uid: activeUser.uid });
     }
   } catch (error) {
     console.log("Error occurred:", error);

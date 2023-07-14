@@ -1,9 +1,6 @@
-// const firebase = require("firebase/compat/app")
-// require("firebase/compat/auth")
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
-import { User, activeUser } from '../models/user.js';
-// import * as auth from "firebase/compat/auth"
+import { User } from '../models/user.js';
 
 export const getDefault = (req, res, next) => {
     res.redirect('/login');

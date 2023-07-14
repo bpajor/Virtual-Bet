@@ -15,8 +15,4 @@ export class Offer {
 
     return offers;
   }
-
-  static sendHourlyRequest(cb) {
-    cb();
-  }
 }

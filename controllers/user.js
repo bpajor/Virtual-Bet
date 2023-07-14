@@ -1,7 +1,7 @@
 import axios from "axios";
 import { User, activeUser } from "../models/user.js";
 import { API_KEY } from "../helpers/api-key.js";
-import { Offer, offer } from "../models/Offer.js";
+import { Offer } from "../models/Offer.js";
 import { Odd, odds } from "../models/Odd.js";
 
 export const getHomePage = async (req, res, next) => {
@@ -104,8 +104,6 @@ export const postLogout = (req, res, next) => {
 
 export const patchPayment = async (req, res, next) => {
   const inputWalletAmount = +req.body.amount;
-  // const prevWalletAmount = +activeUser.walletAmount;
-  // const walletAmountToPatch = inputWalletAmount + prevWalletAmount;
 
   await User.upgradeUserWallet(inputWalletAmount, async (newAmount) => {
     try {

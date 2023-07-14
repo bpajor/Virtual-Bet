@@ -80,27 +80,6 @@ export class Odd {
     }
   }
 
-  // static updateFactors() {
-  //   console.log('in factors', odds);
-  //   for (let odd in odds) {
-  //     const oddId = odds[odd].id;
-  //     const bookmaker = offer
-  //       .find((match) => match.id === oddId)
-  //       .bookmakers.find((bookmacher) => bookmacher.key === odds[odd].bookmacherId);
-  //     switch (odds[odd].userChoice) {
-  //       case "1":
-  //         odds[odd].factor = +bookmaker.markets[0].outcomes[0].price;
-  //         break;
-  //       case "2":
-  //         odds[odd].factor = +bookmaker.markets[0].outcomes[1].price;
-  //         break;
-  //       case "draw":
-  //         odds[odd].factor = +bookmaker.markets[0].outcomes[2].price;
-  //         break;
-  //     }
-  //   }
-  // }
-
   async findMatch(getLeagueMatches) {
     const leagueMatches = await getLeagueMatches();
     const match = leagueMatches.find((match) => match.id === this.oddId);

@@ -19,12 +19,10 @@ export const postLogin = (req, res, next) => {
 
     firebase.auth().signInWithEmailAndPassword(email, password).then((userCredential) => {
         const uid = userCredential.user.uid;
-        console.log(uid);
         const user = new User(uid);
         User.setActiveUser(user);
         res.redirect(`/user/${uid}`)
     }).catch(error => {
-        console.log(error);
-        res.render('login/login-page', {pageTitle: 'gówno', badLogin: true, incorrectUID: false})
+        res.render('login/login-page', {pageTitle: 'Login Page', badLogin: true, incorrectUID: false})
     })
 }

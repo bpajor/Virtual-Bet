@@ -27,6 +27,5 @@ export class User {
         }
       }
     }
-    cb();
   }
 }

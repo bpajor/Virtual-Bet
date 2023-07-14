@@ -90,11 +90,10 @@
               <% } %>
             </td>
             <td>
-              <% if ( (odds[odd].commence_time - new Date() < 0) &&
-              !odds[odd].completed ) {%>
+              <% if ( !odds[odd].completed ) {%>
               <button disabled>Usuń</button>
               <% } else {%>
-              <button>Usuń</button>
+              <button onclick='onDeleteOddButtonClicked("<%=odds[odd].oddId%>")'>Usuń</button>
               <% } %>
             </td>
           </tr>
@@ -109,6 +108,20 @@
         row.remove();
         
         fetch(`/user/<%=uid%>/odds/delete?oddAmount=${oddAmount}&oddId=${oddId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).catch((error) => {
+          console.log(error);
+        });
+      }
+
+      const onDeleteOddButtonClicked = (oddId) => {
+        const row = document.getElementById(oddId);
+        row.remove();
+        
+        fetch(`/user/<%=uid%>/odds/delete?oddId=${oddId}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",

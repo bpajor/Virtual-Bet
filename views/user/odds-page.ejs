@@ -67,7 +67,7 @@
                 style="color: #e01f28"
               ></i>
             </td>
-            <%}%> <% } else if (odds[odd].commence_time - new Date() < 0 ) {%>
+            <%}%> <% } else if (new Date(odds[odd].commence_time) - new Date() < 0 ) {%>
             <td><i class="fa-solid fa-tv fa-2xl"></i></td>
             <% } else {%>
             <td>

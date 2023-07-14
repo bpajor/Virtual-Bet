@@ -10,7 +10,7 @@ export class User {
   }
 
   static async upgradeUserWallet(amount, sendReq) {
-    const newAmount = +activeUser.walletAmount + +amount;
+    const newAmount = (+activeUser.walletAmount + +amount).toFixed(2);
     activeUser.walletAmount = newAmount;
 
     await sendReq(newAmount);

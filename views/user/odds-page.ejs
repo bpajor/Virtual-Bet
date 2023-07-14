@@ -50,10 +50,10 @@
             <td>x<%=odds[odd].factor%></td>
             <td><%=(odds[odd].oddAmount * odds[odd].factor).toFixed(2)%> $</td>
             <% if (odds[odd].completed) {%> <% if ((odds[odd].userChoice === '1'
-            && odds[odd].scores[0] > odds[odd].scores[1]) ||
-            (odds[odd].userChoice === '2' && odds[odd].scores[0] <
-            odds[odd].scores[1]) || (odds[odd].userChoice === 'draw' &&
-            odds[odd].scores[0] === odds[odd].scores[1])) { %>
+            && +odds[odd].scores[0].score > +odds[odd].scores[1].score) ||
+            (odds[odd].userChoice === '2' && +odds[odd].scores[0].score <
+            +odds[odd].scores[1].score) || (odds[odd].userChoice === 'draw' &&
+            +odds[odd].scores[0].score === +odds[odd].scores[1].score)) { %>
             <td>
               <i
                 class="fa-solid fa-circle-check fa-2xl"

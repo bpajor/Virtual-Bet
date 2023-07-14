@@ -13,35 +13,6 @@ export const getHomePage = (req, res, next) => {
       const isUserLoggedIn = activeUser.uid === uid;
       activeUser.authorizeUser(uid, Users, isUserLoggedIn, async () => {
         if (isUserLoggedIn) {
-          const dateResponse = await axios.get(
-            "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable/previousRequestDate.json"
-          );
-          const prevRequestDate = new Date(dateResponse.data);
-          const currentDate = new Date();
-          if (
-            offer === undefined ||
-            (currentDate - prevRequestDate) / (1000 * 60) > 5
-          ) {
-            await Offer.sendHourlyRequest(async () => {
-              try {
-                const res = await axios.get(
-                  `https://api.the-odds-api.com/v4/sports/soccer/odds?apiKey=${API_KEY}&regions=eu&markets=h2h&dateFormat=iso&oddsFormat=decimal`
-                );
-                try {
-                  const response = await axios.put(
-                    "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable.json",
-                    { offers: res.data, previousRequestDate: new Date() }
-                  );
-                } catch (error) {
-                  console.log(error);
-                }
-              } catch (error) {
-                console.log("get from API error");
-                //TODO: Handle error page (offer not available)
-              }
-            });
-          }
-
           try {
             const resp = await axios.get(
               `https://react-http-662b7-default-rtdb.firebaseio.com/Users/${activeUser.key}/Odds.json`
@@ -52,20 +23,109 @@ export const getHomePage = (req, res, next) => {
           }
 
           try {
-            const resp = await axios.get(
-              "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable/offers.json"
-            );
-            await Offer.setOffer(resp.data);
-            const offers = Offer.reduceOfferFromOdds();
-            res.render("user/home-page", {
-              uid: uid,
-              username: activeUser.name,
-              walletAmount: activeUser.walletAmount,
-              offers,
+            await Odd.updateCompletedAndScores(async (leagueType) => {
+              try {
+                const res = await axios.get(
+                  `https://api.the-odds-api.com/v4/sports/${leagueType}/scores?apiKey=${API_KEY}&daysFrom=3`
+                );
+
+                return res.data;
+              } catch (error) {
+                console.log(error);
+              }
             });
           } catch (error) {
             console.log(error);
           }
+
+          try {
+            await Odd.checkWalletAmountUpdateNeccessary(
+              async (newAmount) => {
+                try {
+                  await axios.patch(
+                    `https://react-http-662b7-default-rtdb.firebaseio.com/Users/${activeUser.key}.json`,
+                    { walletAmount: +newAmount }
+                  );
+                } catch (error) {
+                  console.log(error);
+                }
+              },
+              async (offerId) => {
+                try {
+                  await axios.patch(
+                    `https://react-http-662b7-default-rtdb.firebaseio.com/Users/${activeUser.key}/Odds/${offerId}.json`,
+                    { walletUpdated: true }
+                  );
+                } catch (error) {
+                  console.log(error);
+                }
+              }
+            );
+          } catch (error) {
+            console.log(error);
+          }
+
+          const dateResponse = await axios.get(
+            "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable/previousRequestDate.json"
+          );
+          const prevRequestDate = new Date(dateResponse.data);
+          const currentDate = new Date();
+          await Offer.sendHourlyRequest(async () => {
+            try {
+              const ress = await axios.get(
+                `https://api.the-odds-api.com/v4/sports/soccer/odds?apiKey=${API_KEY}&regions=eu&markets=h2h&dateFormat=iso&oddsFormat=decimal`
+              );
+              try {
+                const response = await axios.put(
+                  "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable.json",
+                  { offers: ress.data, previousRequestDate: new Date() }
+                );
+                try {
+                  const resp = await axios.get(
+                    "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable/offers.json"
+                  );
+                  await Offer.setOffer(resp.data);
+                  const offers = Offer.reduceOfferFromOdds();
+                  res.render("user/home-page", {
+                    uid: uid,
+                    username: activeUser.name,
+                    walletAmount: activeUser.walletAmount,
+                    offers,
+                  });
+                } catch (error) {
+                  console.log(error);
+                }
+              } catch (error) {
+                console.log(error);
+              }
+            } catch (error) {
+              console.log("get from API error");
+              //TODO: Handle error page (offer not available)
+            }
+          });
+
+          // res.render("user/home-page", {
+          //   uid: uid,
+          //   username: activeUser.name,
+          //   walletAmount: activeUser.walletAmount,
+          //   offers,
+          // });
+          // try {
+          //   const resp = await axios.get(
+          //     "https://react-http-662b7-default-rtdb.firebaseio.com/MatchesAvailable/offers.json"
+          //   );
+          //   console.log(resp.data);
+          //   await Offer.setOffer(resp.data);
+          //   const offers = Offer.reduceOfferFromOdds();
+          //   res.render("user/home-page", {
+          //     uid: uid,
+          //     username: activeUser.name,
+          //     walletAmount: activeUser.walletAmount,
+          //     offers,
+          //   });
+          // } catch (error) {
+          //   console.log(error);
+          // }
         } else {
           res.render("login/login-page", {
             pageTitle: "login",
@@ -108,18 +168,6 @@ export const patchPayment = (req, res, next) => {
 };
 
 export const getOdds = async (req, res, next) => {
-  Odd.updateFactors();
-  await Odd.updateCompletedAndScores(async (leagueType) => {
-    try {
-      const res = await axios.get(
-        `https://api.the-odds-api.com/v4/sports/${leagueType}/scores?apiKey=e4afa8b45e5d32053f1202b125cc2916&daysFrom=3`
-      );
-
-      return res.data;
-    } catch (error) {
-      console.log(error);
-    }
-  });
   try {
     const resp = await axios.put(
       `https://react-http-662b7-default-rtdb.firebaseio.com/Users/${activeUser.key}/Odds.json`,
@@ -128,7 +176,6 @@ export const getOdds = async (req, res, next) => {
   } catch (error) {
     console.log(error);
   }
-
   res.render("user/odds-page", { uid: activeUser.uid, odds });
 };
 
@@ -146,7 +193,7 @@ export const postOdd = async (req, res, next) => {
   try {
     const match = await odd.findMatch(async () => {
       const res = await axios.get(
-        `https://api.the-odds-api.com/v4/sports/${leagueType}/scores?apiKey=e4afa8b45e5d32053f1202b125cc2916&daysFrom=3`
+        `https://api.the-odds-api.com/v4/sports/${leagueType}/scores?apiKey=${API_KEY}&daysFrom=3`
       );
 
       return res.data;

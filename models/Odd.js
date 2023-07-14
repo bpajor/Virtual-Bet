@@ -1,4 +1,5 @@
 import { offer } from "./Offer.js";
+import { User } from "./user.js";
 
 export let odds = undefined;
 
@@ -36,35 +37,69 @@ export class Odd {
 
   static async updateCompletedAndScores(sendReq) {
     for (let odd in odds) {
-      const leagueType = offer.find((match) => match.id === odds[odd].id).sport_key;
-      console.log(leagueType);
+      const leagueType = odds[odd].sport_key;
       const leagueOddsList = await sendReq(leagueType);
-      const singleOdd = leagueOddsList.find((match) => match.id === odds[odd].id);
+      if (!leagueOddsList) {
+        return;
+      }
+      const singleOdd = leagueOddsList.find(
+        (match) => match.id === odds[odd].id
+      );
       odds[odd].scores = singleOdd.scores;
       odds[odd].completed = singleOdd.completed;
     }
   }
 
-  static updateFactors() {
-    console.log('in factors', odds);
+  static async checkWalletAmountUpdateNeccessary(updateWalletReq, updateWalletUpdated) {
     for (let odd in odds) {
-      const oddId = odds[odd].id;
-      const bookmaker = offer
-        .find((match) => match.id === oddId)
-        .bookmakers.find((bookmacher) => bookmacher.key === odds[odd].bookmacherId);
-      switch (odds[odd].userChoice) {
-        case "1":
-          odds[odd].factor = +bookmaker.markets[0].outcomes[0].price;
-          break;
-        case "2":
-          odds[odd].factor = +bookmaker.markets[0].outcomes[1].price;
-          break;
-        case "draw":
-          odds[odd].factor = +bookmaker.markets[0].outcomes[2].price;
-          break;
+      let isWin = false;
+      if (odds[odd].completed && !odds[odd].walletUpdated) {
+        switch (odds[odd].userChoice) {
+          case "1":
+            isWin = +odds[odd].scores[0].score > +odds[odd].scores[1].score;
+            break;
+
+          case "2":
+            isWin = +odds[odd].scores[0].score < +odds[odd].scores[1].score;
+            break;
+
+          case "draw":
+            isWin = +odds[odd].scores[0].score === +odds[odd].scores[1].score;
+            break;
+        }
+        if (isWin) {
+          await User.upgradeUserWallet(
+            (+odds[odd].oddAmount * +odds[odd].factor).toFixed(2),
+            updateWalletReq
+          );
+
+          await updateWalletUpdated(odds[odd].oddId);
+          odds[odd].walletUpdated = true;
+        }
       }
     }
   }
+
+  // static updateFactors() {
+  //   console.log('in factors', odds);
+  //   for (let odd in odds) {
+  //     const oddId = odds[odd].id;
+  //     const bookmaker = offer
+  //       .find((match) => match.id === oddId)
+  //       .bookmakers.find((bookmacher) => bookmacher.key === odds[odd].bookmacherId);
+  //     switch (odds[odd].userChoice) {
+  //       case "1":
+  //         odds[odd].factor = +bookmaker.markets[0].outcomes[0].price;
+  //         break;
+  //       case "2":
+  //         odds[odd].factor = +bookmaker.markets[0].outcomes[1].price;
+  //         break;
+  //       case "draw":
+  //         odds[odd].factor = +bookmaker.markets[0].outcomes[2].price;
+  //         break;
+  //     }
+  //   }
+  // }
 
   async findMatch(getLeagueMatches) {
     const leagueMatches = await getLeagueMatches();

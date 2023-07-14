@@ -38,4 +38,6 @@ app.use((req, res, next) => {
   res.status(404).render('error/error-page', {isUserActive: false})
 });
 
-app.listen(3000);
+const port = process.env.PORT || 3000;
+
+app.listen(port);

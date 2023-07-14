@@ -81,7 +81,7 @@ export const getHomePage = async (req, res, next) => {
         offers,
       });
     } else {
-      res.redirect("/login");
+      res.status(401).render("user/not-authorised", {uid: activeUser.uid})
     }
   } catch (error) {
     console.log("Error occurred:", error);
@@ -115,18 +115,6 @@ export const patchPayment = async (req, res, next) => {
       res.status(503).render("user/server-error-page", { uid: activeUser.uid });
     }
   });
-
-  axios
-    .patch(
-      `https://react-http-662b7-default-rtdb.firebaseio.com/Users/${activeUser.key}.json`,
-      { walletAmount: walletAmountToPatch }
-    )
-    .then(() => {
-      res.redirect(`${activeUser.uid}`);
-    })
-    .catch((error) => {
-      res.status(503).render("user/server-error-page", { uid: activeUser.uid });
-    });
 };
 
 export const getOdds = async (req, res, next) => {
